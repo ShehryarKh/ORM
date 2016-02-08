@@ -1,157 +1,48 @@
-# ORM and Unix Introduction
+# Baby ORM
 
-### Learning Objectives
-***Students Will Be Able To***
+* Today you will be building your own ORM. Or at least part of it.
+* Check out the [ORM Wiki](http://en.wikipedia.org/wiki/Object-relational_mapping)
+* This will give you a behind the scenes look to what the Django ORM will be doing for you later in the course
 
-* Wrap SQL queries inside Python objects to make an ORM
+##### Objective 1
 
----
-### Context
+* Create a model class that all the other models will inherit from
+* Take a look at the orm_class.py file we included
+* You will need to use `**kwargs` for some of these methods
+* You will also need the `setattr()` function. Check out the [documentation](https://docs.python.org/3/library/functions.html#setattr)
+	* Instead of having a value be self.something we want to set it to name.something
 
-* When working with back end technologies many frameworks come with a short hand so there's no need to write out SQL code from scratch.
+##### Objective 2
 
----
-### Lesson
+* Complete the `all()` method
+* This method should return all rows in the database whose name matches the class
+* The rows should be instances of the class, not just sqlite3's return value.
+* A user can enter anything they want so how will we target the correct class/table
+* Test your answers with the provided `babyorm.db`
+* You might be asking why do we need to target the class name. Well what if we have multiple tables? Every table has their own class.
 
-##### Part 1 - What is an ORM
+##### Objective 3
 
-* ORM stands for Object Relational Mapper.
-* This is a term for a programming practice where we can convert a type system to an object oriented language.
-* What does this mean in English?
-* This means we will be wrapping our SQL queries into Python methods. Now the rows in a table can be instances of a class.
-* As mentioned in the Context of this lesson, many frameworks will have access to an "ORM" so the programmer does not have to write SQL queries from scratch.
+* Write your `get()` method
+* This method will take in a condition and return 1 row from the table
+* How can you limit the results to 1 row in SQL?
 
-***NOTE***
+##### Objective 4
 
-* Another example is the non relational database Mongo and it's (kind of)ORM framework Mongoose
+* Write your `filter()` method
+* This method will take in a condition and return multiple rows from the table
 
-##### Part 2 - ORM SELECT ALL SQL Example
 
-* If you had a music application and wanted to search all artists in your database it may look something like
+***HINTS***
 
-```
-SELECT * FROM Artists;
-```
-* Now using the ORM that you will build, you will just be invoking a method
-
-```
-Artists.all()
-```
-* This can be called at any time a user wants to search for ALL artists
-* How might we do this if we wanted to actually have some where conditions? return a specific value?
-
-```
-SELECT * FROM Artists WHERE name = "Linkin Park";
-```
-* With an ORM this may look like:
+* Use the following
+	* setattr()
+		* This takes in three arguments, you can use `self` for the first argument
+* kwargs
+	* Remember these are keyword arguments, what can we use these for if the user is searching for things?
+* How do you get the class name? What does the below mean
 
 ```
-Artists.filter(name = "Linkin Park")
+cls.__name__
 ```
-* What if we had multiple conditions? What can we use for that?
-* Our query based on multiple conditions might look like this:
-```
-Artists.filter(name = "Linkin Park", song_title = "Numb)
-```
-* **kwargs will be able to help you out here!
 
-##### Part 3 - @classmethod and @staticmethod
-
-* Let's look at some example code to get started here:
-```
-class Date:
-
-    day = 0
-    month = 0
-    year = 0
-
-    def __init__(self, day=0, month=0, year=0):
-        self.day = day
-        self.month = month
-        self.year = year
-```
-* We're creating a `Date` class that we'll use to make `Date` objects later.
-* Now let's imagine I want to make objects of type `Date` by only passing along a `string`, like `"31-3-1984"`. One way I can do this is with a `@classmethod`. To my Date class, I'll add the following code:
-```
-    @classmethod
-    def from_string(cls, date_as_string):
-        day, month, year = map(int,  date_as_string.split('-'))
-        date1 = cls(day, month, year)
-        return date1
-
-date2 = Date.from_string('11-09-2012')
-```
-* You'll notice a few things here:
-* First, the first parameter of the `from_string` function is `cls`. This is a placeholder that's similar to `self`. In this case, it stands for the `Date` class.
-* Second, you'll notice that we use `cls` in the expression, `date1 = cls(day, month, year)`. This lets us make a new object of type `Date`.
-* Third, you'll see the last thing we do is call the `from_string` method on the `Date` class. This is where we use `@classmethods`.
-* You can read an extended explanation here: [@classmethods and @staticmethods](http://stackoverflow.com/questions/12179271/python-classmethod-and-staticmethod-for-beginner).
-
-##### Part 4 - Moar Python syntax that will help with baby ORM: `setattr()`, `hasattr()`, `class.__name__`
-* `setattr()` - This is used to set an attribute to an instance of a class. It takes in three parameters. The class name, the attribute name, and the value. How might you use this with kwargs?
-* Example:
-```python
-cat = Cat()
-
-setattr(cat, "weight", 10)
-
-value = getattr(cat, "weight")
-print(value)
-# output will be 10
-```
-----------
-* `hasattr()` - This will check for an attribute in a instance. It will take in two parameters. The name of the class and the property you're looking for
-Example:
-```python
-box = Box()
-
-# Create a width attribute.
-setattr(box, "width", 15)
-
-# The attribute exists.
-if hasattr(box, "width"):
-    print(True)
-
-# Delete the width attribute.
-delattr(box, "width")
-
-# Width no longer exists.
-if not hasattr(box, "width"):
-    print(False)
-
-# Output will be...
-True
-False
-```
-* If you see documentation for `getattr()` we suggest using hasattr over that because getattr can return an error and make it seem like it does not exists at all.
-
-----------
-* `class.__name__` - This is used to get our class name as a string
-* Let's look at an example. Imagine we start our babyorm.py file with the following code:
-```
-class Model:
-    def __init__(self):
-        pass
-
-    @classmethod
-    def all(cls):
-        pass
-
-class Users(Model):
-    pass
-
-class Stocks(Model):
-    pass
-```
-* Now, we want the `all()` method within the `Model` class to be able to query either the Users SQL table or the Stocks SQL table. We could use some syntax that looks like this to get the name of the class that's invoking the `all()` method:
-```
-    @classmethod
-    def all(cls):
-        #get the table name from the name of the child class
-        table_name = cls.__name__
-```
-* At this point, the table_name variable will contain the name of whatever class is invoking that method. So if we did `Users.all()`, then `table_name` would contain the value `"Users"`.
-
-
-----------
-* `**kwargs` - we already studied this. Keyword arguments!!! wooooo
