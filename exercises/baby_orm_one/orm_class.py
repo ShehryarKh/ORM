@@ -29,8 +29,6 @@ class Model:
         cursor = conn.cursor()
         cursor.execute(
 
-           
-
             """ SELECT * FROM {}""".format(table_name,)
             )
 
