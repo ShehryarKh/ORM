@@ -3,8 +3,11 @@ import pudb
 
 
 class Model:
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.id = id
+        for key, value in kwargs.items():#
+            setattr(self, key, value)
+        
         #self.filename = 
         #self.name = name
         #self.class_name = class_name
@@ -52,7 +55,6 @@ class Model:
             columkey = key
             columvalue = value 
 
-
         cursor.execute(
 
             """ SELECT * FROM {} Where {} = \"{}\";""".format(table_name, columkey, columvalue))
@@ -68,13 +70,11 @@ class Model:
         conn  = sqlite3.connect("babyorm.db")
         cursor = conn.cursor()
         table_name = cls.__name__
-
         for key, value in kwargs.items():
             columkey = key
             columvalue = value 
 
- 
-        c = """ SELECT * FROM {} Where {} = \"{}\" ;""".format(table_name, columkey, columvalue)
+        c = """ SELECT * FROM {} Where {} = \"{}\" ;""".format(table_name, key, value)
         cursor.execute(c)
         print(c)
         row =cursor.fetchall()
@@ -93,9 +93,10 @@ class Users(Model):
 class Stocks(Model):
     pass
 
+
 Users.all()
 #Stocks.all()
 dic={"name":"Myles","name":"Sandra"}
-Users.get(**dic)
-Users.filter(**dic)
+Users.get(name='Dr.')
+Users.filter(name='Dr.')
 #Stocks.all()
